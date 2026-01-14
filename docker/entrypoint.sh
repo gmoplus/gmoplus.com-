@@ -34,7 +34,7 @@ update_config() {
         sed -i "s|{db_name}|${DB_NAME:-gmoplus}|g" "$CONFIG_FILE"
         sed -i "s|{db_prefix}|${DB_PREFIX:-fl_}|g" "$CONFIG_FILE"
         sed -i "s|{rl_dir}|''|g" "$CONFIG_FILE"
-        sed -i "s|{rl_root}|'/var/www/html/'|g" "$CONFIG_FILE"
+        sed -i "s|{rl_root}|/var/www/html|g" "$CONFIG_FILE"
         sed -i "s|{rl_url}|'${APP_URL:-https://gmoplus.com}/'|g" "$CONFIG_FILE"
         sed -i "s|{rl_admin}|'admin'|g" "$CONFIG_FILE"
         sed -i "s|{rl_cache_postfix}|_$(date +%s)|g" "$CONFIG_FILE"
