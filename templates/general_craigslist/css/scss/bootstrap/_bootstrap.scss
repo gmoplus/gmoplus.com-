@@ -1,0 +1,13 @@
+/*!
+ * Bootstrap v4.5.3 - Container styles only, all rest styles includes in template as separate file
+ */
+@import "mixins/_breakpoints.scss";
+@import "_variables.scss";
+
+.clearfix {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}

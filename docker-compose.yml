@@ -1,0 +1,108 @@
+# GMO Plus - Docker Compose for Coolify
+# Docker Compose version 3.8+
+version: '3.8'
+
+services:
+  # PHP/Apache Web Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gmoplus-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      # Database Configuration (Override these in Coolify)
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-gmoplus}
+      - DB_USER=${DB_USER:-gmoplus}
+      - DB_PASSWORD=${DB_PASSWORD:-gmoplus_password}
+      - DB_PREFIX=${DB_PREFIX:-fl_}
+      # Redis Configuration
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # Application URL
+      - APP_URL=${APP_URL:-https://gmoplus.com}
+    volumes:
+      # Persist uploaded files
+      - gmoplus_files:/var/www/html/files
+      # Persist temporary files (cache, sessions)
+      - gmoplus_tmp:/var/www/html/tmp
+      # Persist backups
+      - gmoplus_backup:/var/www/html/backup
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - gmoplus-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MySQL/MariaDB Database
+  db:
+    image: mariadb:10.11
+    container_name: gmoplus-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password_change_me}
+      - MYSQL_DATABASE=${DB_NAME:-gmoplus}
+      - MYSQL_USER=${DB_USER:-gmoplus}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-gmoplus_password}
+    volumes:
+      - gmoplus_db:/var/lib/mysql
+      # Initialize database on first run
+      - ./install/mysql/dump.sql:/docker-entrypoint-initdb.d/01-dump.sql:ro
+    networks:
+      - gmoplus-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+      --max-connections=200
+
+  # Redis Cache (Optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: gmoplus-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
+    volumes:
+      - gmoplus_redis:/data
+    networks:
+      - gmoplus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+# Named volumes for data persistence
+volumes:
+  gmoplus_db:
+    driver: local
+  gmoplus_files:
+    driver: local
+  gmoplus_tmp:
+    driver: local
+  gmoplus_backup:
+    driver: local
+  gmoplus_redis:
+    driver: local
+
+# Network for service communication
+networks:
+  gmoplus-network:
+    driver: bridge

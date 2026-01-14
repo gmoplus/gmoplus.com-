@@ -1,0 +1,51 @@
+# Docker ignore file for GMO Plus
+# Reduces build context and image size
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+LICENSE
+CHANGELOG.md
+docs/
+
+# Development files
+.env
+.env.local
+*.log
+error_log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+backup/*.sql
+
+# Temp files that should not be in image
+tmp/cache_*/*
+tmp/upload/*
+
+# Large zip files
+*.zip
+
+# Node (if any frontend build tools)
+node_modules/
+
+# Tests
+tests/
+test/
+phpunit.xml

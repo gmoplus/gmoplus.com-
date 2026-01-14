@@ -1,0 +1,85 @@
+# ============================================
+# GMO Plus - Git Ignore File
+# GitHub'a push için optimize edildi
+# ============================================
+
+# ============================================
+# BÜYÜK ZIP DOSYALARI - GitHub 100MB limitini aşar!
+# ============================================
+# Flynax orijinal kurulum paketi (gereksiz - zaten kurulu)
+FL0255RKH690*.zip
+
+# Admin yedeği (241MB - kesinlikle hariç!)
+admin.zip
+
+# Backup klasöründeki tüm zip'ler
+backup/**/*.zip
+backup/*.zip
+
+# ============================================
+# GeoIP VERITABANI (55MB - runtime'da indirilmeli)
+# ============================================
+plugins/ipgeo/*.mmdb
+plugins/ipgeo/GeoLite2-City.mmdb
+
+# ============================================
+# ENVIRONMENT & CONFIG (Hassas bilgiler!)
+# ============================================
+.env
+.env.local
+.env.production
+.env.staging
+
+# Config PHP - içinde şifreler var!
+# NOT: Coolify entrypoint.sh otomatik oluşturacak
+includes/config.inc.php
+
+# ============================================
+# CACHE & TEMPORARY FILES
+# ============================================
+tmp/cache_*/
+tmp/upload/
+tmp/session/
+tmp/smarty_cache/
+tmp/smarty_compiled/
+
+# ============================================
+# LOG FILES
+# ============================================
+*.log
+error_log
+/error_log
+admin/error_log
+
+# ============================================
+# IDE & EDITOR FILES
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+*~
+.project
+.settings/
+
+# ============================================
+# OS FILES
+# ============================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# NODE & BUILD TOOLS
+# ============================================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ============================================
+# PHP FILES
+# ============================================
+.phpunit.result.cache
+phpunit.xml
+vendor/bin/
