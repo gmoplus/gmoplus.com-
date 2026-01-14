@@ -83,3 +83,6 @@ yarn-error.log
 .phpunit.result.cache
 phpunit.xml
 vendor/bin/
+
+# PDF files with long/special character names
+files/*.pdf
