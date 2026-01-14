@@ -56,12 +56,12 @@ update_config() {
     fi
 }
 
-# Function to wait for database
+# Function to wait for database (non-blocking)
 wait_for_db() {
     if [[ -n "${DB_HOST}" ]]; then
         echo "⏳ Waiting for database connection..."
         
-        max_attempts=30
+        max_attempts=15
         attempt=0
         
         while [ $attempt -lt $max_attempts ]; do
@@ -75,8 +75,9 @@ wait_for_db() {
             sleep 2
         done
         
-        echo "❌ Could not connect to database after $max_attempts attempts"
-        exit 1
+        echo "⚠️  Warning: Could not connect to database after $max_attempts attempts"
+        echo "⚠️  Apache will start anyway. Database may become available later."
+        # Don't exit - let Apache start
     fi
 }
 
