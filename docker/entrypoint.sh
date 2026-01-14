@@ -1,14 +1,12 @@
 #!/bin/bash
 # GMO Plus - Entrypoint Script for Docker Container
-# This script handles dynamic configuration based on environment variables
-
-set -e
+# Simplified version for Coolify compatibility
 
 echo "🚀 GMO Plus - Starting container initialization..."
 
 # Create PHP error log directory
-mkdir -p /var/log/php
-chown www-data:www-data /var/log/php
+mkdir -p /var/log/php 2>/dev/null
+chown www-data:www-data /var/log/php 2>/dev/null
 
 # Function to update config file with environment variables
 update_config() {
@@ -20,7 +18,7 @@ update_config() {
         
         # Backup existing config
         if [[ -f "$CONFIG_FILE" ]]; then
-            cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+            cp "$CONFIG_FILE" "$CONFIG_FILE.bak" 2>/dev/null
         fi
         
         # Generate new config from template
@@ -46,66 +44,25 @@ update_config() {
         if [[ -n "${REDIS_PORT}" ]]; then
             sed -i "s|define('RL_REDIS_PORT', 6379)|define('RL_REDIS_PORT', ${REDIS_PORT})|g" "$CONFIG_FILE"
         fi
-        if [[ -n "${REDIS_PASSWORD}" ]]; then
-            sed -i "s|define('RL_REDIS_PASS', '')|define('RL_REDIS_PASS', '${REDIS_PASSWORD}')|g" "$CONFIG_FILE"
-        fi
         
         echo "✅ Configuration updated successfully!"
     else
-        echo "ℹ️  Using existing configuration (no DB_HOST/DB_NAME env vars provided)"
+        echo "ℹ️  Using existing configuration"
     fi
 }
 
-# Function to wait for database (non-blocking)
-wait_for_db() {
-    if [[ -n "${DB_HOST}" ]]; then
-        echo "⏳ Waiting for database connection..."
-        
-        max_attempts=15
-        attempt=0
-        
-        while [ $attempt -lt $max_attempts ]; do
-            if php -r "new PDO('mysql:host=${DB_HOST};port=${DB_PORT:-3306}', '${DB_USER:-root}', '${DB_PASSWORD:-}');" 2>/dev/null; then
-                echo "✅ Database connection established!"
-                return 0
-            fi
-            
-            attempt=$((attempt + 1))
-            echo "   Attempt $attempt/$max_attempts - Database not ready, waiting..."
-            sleep 2
-        done
-        
-        echo "⚠️  Warning: Could not connect to database after $max_attempts attempts"
-        echo "⚠️  Apache will start anyway. Database may become available later."
-        # Don't exit - let Apache start
-    fi
-}
-
-# Fix permissions
-fix_permissions() {
-    echo "🔧 Fixing file permissions..."
-    chown -R www-data:www-data /var/www/html/files
-    chown -R www-data:www-data /var/www/html/tmp
-    chown -R www-data:www-data /var/www/html/backup
-    chmod -R 755 /var/www/html
-    chmod -R 777 /var/www/html/tmp
-    chmod -R 777 /var/www/html/files
-    chmod -R 777 /var/www/html/backup
-    echo "✅ Permissions fixed!"
-}
-
-# Clear cache
-clear_cache() {
-    echo "🧹 Clearing cache..."
-    find /var/www/html/tmp/cache_* -type f -delete 2>/dev/null || true
-    echo "✅ Cache cleared!"
+# Quick permission fix (only essential directories)
+quick_permissions() {
+    echo "🔧 Setting essential permissions..."
+    chmod 777 /var/www/html/tmp 2>/dev/null || true
+    chmod 777 /var/www/html/files 2>/dev/null || true
+    chmod 777 /var/www/html/backup 2>/dev/null || true
+    echo "✅ Permissions set!"
 }
 
 # Main execution
 update_config
-wait_for_db
-fix_permissions
-clear_cache
+quick_permissions
 
 echo "🎉 GMO Plus initialization complete!"
 echo "🌐 Starting Apache web server..."
