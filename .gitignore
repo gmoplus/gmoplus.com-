@@ -86,3 +86,7 @@ vendor/bin/
 
 # PDF files with long/special character names
 files/*.pdf
+
+# SQL dumps
+*.sql
+gmoplus_gmoplus.sql
