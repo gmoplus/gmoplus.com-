@@ -23,6 +23,9 @@ update_config() {
         
         # Generate new config from template
         cp "$TEMPLATE_FILE" "$CONFIG_FILE"
+
+        # Add SSL Proxy Fix for Coolify/Traefik
+        sed -i "s|<?php|<?php\n\n// SSL Proxy Fix\nif (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \$_SERVER['HTTPS'] = 'on'; }|g" "$CONFIG_FILE"
         
         # Replace placeholders
         sed -i "s|{db_port}|${DB_PORT:-3306}|g" "$CONFIG_FILE"
