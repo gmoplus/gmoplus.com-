@@ -5,7 +5,7 @@ RewriteBase /
 ServerSignature Off
 
 # Block sensitive files
-<FilesMatch "\.(inc\.php|tpl|sql|ini)$">
+<FilesMatch "\.(tpl|sql|ini)$">
     Order deny,allow
     Deny from all
 </FilesMatch>
