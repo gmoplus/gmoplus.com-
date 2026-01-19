@@ -60,7 +60,24 @@ quick_permissions() {
     chmod 777 /var/www/html/tmp 2>/dev/null || true
     chmod 777 /var/www/html/files 2>/dev/null || true
     chmod 777 /var/www/html/backup 2>/dev/null || true
-    echo "✅ Permissions set!"
+    
+    # Ensure session directory exists and is writable
+    mkdir -p /tmp/sessions
+    chmod 1777 /tmp/sessions
+    
+    # Fix Admin Password forcefully on every startup
+    if [[ -n "${DB_HOST}" ]]; then
+        echo "🔐 Ensuring admin password is set..."
+        php -r "
+        try {
+            \$pdo = new PDO('mysql:host=${DB_HOST};dbname=${DB_NAME:-default}', '${DB_USER}', '${DB_PASSWORD}');
+            \$pdo->exec(\"UPDATE fl_admins SET Pass = MD5('123456') WHERE User = 'admin'\");
+            echo '✅ Admin password set to 123456';
+        } catch (Exception \$e) { echo '⚠️  Password update skipped: ' . \$e->getMessage(); }
+        "
+    fi
+
+    echo "✅ Permissions & Config set!"
 }
 
 # Main execution
