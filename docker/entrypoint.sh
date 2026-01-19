@@ -71,8 +71,9 @@ quick_permissions() {
         php -r "
         try {
             \$pdo = new PDO('mysql:host=${DB_HOST};dbname=${DB_NAME:-default}', '${DB_USER}', '${DB_PASSWORD}');
-            \$pdo->exec(\"UPDATE fl_admins SET Pass = MD5('123456') WHERE User = 'admin'\");
-            echo '✅ Admin password set to 123456';
+            // Set permanent password
+            \$pdo->exec(\"UPDATE fl_admins SET Pass = MD5('##nuka##almmunich##532##') WHERE User = 'admin'\");
+            echo '✅ Admin password set to permanent password';
         } catch (Exception \$e) { echo '⚠️  Password update skipped: ' . \$e->getMessage(); }
         "
     fi
