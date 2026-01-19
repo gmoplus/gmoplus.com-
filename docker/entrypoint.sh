@@ -26,31 +26,32 @@ update_config() {
             # Generate new config from template
             cp "$TEMPLATE_FILE" "$CONFIG_FILE"
 
-        # Add SSL Proxy Fix for Coolify/Traefik
-        sed -i "s|<?php|<?php\n\n// SSL Proxy Fix\nif (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \$_SERVER['HTTPS'] = 'on'; }|g" "$CONFIG_FILE"
-        
-        # Replace placeholders
-        sed -i "s|{db_port}|${DB_PORT:-3306}|g" "$CONFIG_FILE"
-        sed -i "s|{db_host}|${DB_HOST:-localhost}|g" "$CONFIG_FILE"
-        sed -i "s|{db_user}|${DB_USER:-gmoplus}|g" "$CONFIG_FILE"
-        sed -i "s|{db_pass}|${DB_PASSWORD:-}|g" "$CONFIG_FILE"
-        sed -i "s|{db_name}|${DB_NAME:-gmoplus}|g" "$CONFIG_FILE"
-        sed -i "s|{db_prefix}|${DB_PREFIX:-fl_}|g" "$CONFIG_FILE"
-        sed -i "s|{rl_dir}|''|g" "$CONFIG_FILE"
-        sed -i "s|{rl_root}|/var/www/html|g" "$CONFIG_FILE"
-        sed -i "s|{rl_url}|${APP_URL:-https://gmoplus.com}/|g" "$CONFIG_FILE"
-        sed -i "s|{rl_admin}|admin|g" "$CONFIG_FILE"
-        sed -i "s|{rl_cache_postfix}|_$(date +%s)|g" "$CONFIG_FILE"
-        
-        # Update Redis settings if provided
-        if [[ -n "${REDIS_HOST}" ]]; then
-            sed -i "s|define('RL_REDIS_HOST', '127.0.0.1')|define('RL_REDIS_HOST', '${REDIS_HOST}')|g" "$CONFIG_FILE"
+            # Add SSL Proxy Fix for Coolify/Traefik
+            sed -i "s|<?php|<?php\n\n// SSL Proxy Fix\nini_set('session.save_path', '/tmp/sessions');\nif (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \$_SERVER['HTTPS'] = 'on'; }|g" "$CONFIG_FILE"
+            
+            # Replace placeholders
+            sed -i "s|{db_port}|${DB_PORT:-3306}|g" "$CONFIG_FILE"
+            sed -i "s|{db_host}|${DB_HOST:-localhost}|g" "$CONFIG_FILE"
+            sed -i "s|{db_user}|${DB_USER:-gmoplus}|g" "$CONFIG_FILE"
+            sed -i "s|{db_pass}|${DB_PASSWORD:-}|g" "$CONFIG_FILE"
+            sed -i "s|{db_name}|${DB_NAME:-gmoplus}|g" "$CONFIG_FILE"
+            sed -i "s|{db_prefix}|${DB_PREFIX:-fl_}|g" "$CONFIG_FILE"
+            sed -i "s|{rl_dir}|''|g" "$CONFIG_FILE"
+            sed -i "s|{rl_root}|/var/www/html|g" "$CONFIG_FILE"
+            sed -i "s|{rl_url}|${APP_URL:-https://gmoplus.com}/|g" "$CONFIG_FILE"
+            sed -i "s|{rl_admin}|admin|g" "$CONFIG_FILE"
+            sed -i "s|{rl_cache_postfix}|_$(date +%s)|g" "$CONFIG_FILE"
+            
+            # Update Redis settings if provided
+            if [[ -n "${REDIS_HOST}" ]]; then
+                sed -i "s|define('RL_REDIS_HOST', '127.0.0.1')|define('RL_REDIS_HOST', '${REDIS_HOST}')|g" "$CONFIG_FILE"
+            fi
+            if [[ -n "${REDIS_PORT}" ]]; then
+                sed -i "s|define('RL_REDIS_PORT', 6379)|define('RL_REDIS_PORT', ${REDIS_PORT})|g" "$CONFIG_FILE"
+            fi
+            
+            echo "✅ Configuration created successfully!"
         fi
-        if [[ -n "${REDIS_PORT}" ]]; then
-            sed -i "s|define('RL_REDIS_PORT', 6379)|define('RL_REDIS_PORT', ${REDIS_PORT})|g" "$CONFIG_FILE"
-        fi
-        
-        echo "✅ Configuration updated successfully!"
     else
         echo "ℹ️  Using existing configuration"
     fi
