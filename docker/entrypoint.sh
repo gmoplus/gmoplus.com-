@@ -14,15 +14,17 @@ update_config() {
     TEMPLATE_FILE="/var/www/html/install/config.inc.php.tmp"
     
     if [[ -n "${DB_HOST}" ]] && [[ -n "${DB_NAME}" ]]; then
-        echo "📝 Updating configuration from environment variables..."
-        
-        # Backup existing config
+        # Check if config exists
         if [[ -f "$CONFIG_FILE" ]]; then
-            cp "$CONFIG_FILE" "$CONFIG_FILE.bak" 2>/dev/null
-        fi
-        
-        # Generate new config from template
-        cp "$TEMPLATE_FILE" "$CONFIG_FILE"
+            echo "ℹ️  Configuration file exists. Keeping it and ensuring fixes..."
+            # Ensure Session/SSL fix is present
+            if ! grep -q "session.save_path" "$CONFIG_FILE"; then
+                 sed -i "s|<?php|<?php\n\n// Session/SSL Fix\nini_set('session.save_path', '/tmp/sessions');\nif (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \$_SERVER['HTTPS'] = 'on'; }|g" "$CONFIG_FILE"
+            fi
+        else
+            echo "📝 Creating new configuration from template..."
+            # Generate new config from template
+            cp "$TEMPLATE_FILE" "$CONFIG_FILE"
 
         # Add SSL Proxy Fix for Coolify/Traefik
         sed -i "s|<?php|<?php\n\n// SSL Proxy Fix\nif (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \$_SERVER['HTTPS'] = 'on'; }|g" "$CONFIG_FILE"

@@ -33,6 +33,8 @@ services:
       - gmoplus_tmp:/var/www/html/tmp
       # Persist backups
       - gmoplus_backup:/var/www/html/backup
+      # Persist includes (config file)
+      - gmoplus_includes:/var/www/html/includes
     depends_on:
       - db
       - redis
